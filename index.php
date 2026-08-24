@@ -240,7 +240,7 @@ $csrf_token = getCsrfToken();
                                 <span class="font-mono text-xs text-on-surface-variant font-semibold bg-surface-container px-2 py-0.5 rounded">Live</span>
                             </div>
 
-                            <div class="py-2 flex flex-col gap-3.5 max-h-[520px] overflow-y-auto pr-1 custom-scroll" id="announcements-container">
+                            <div class="py-2 flex flex-col gap-3.5" id="announcements-container">
                                 <div class="text-center text-on-surface-variant text-sm py-4">
                                     <span class="animate-pulse">Loading announcements...</span>
                                 </div>
@@ -432,29 +432,8 @@ $csrf_token = getCsrfToken();
                 /* Announcement cards grow with their text. Very long posts
                    start collapsed (~12 lines) with a smooth Read-more. */
                 function buildAnnouncementCard(a) {
-                    const full = renderAnnouncementBody(a.body);
-                    const plainLen = String(a.body || '').replace(/<[^>]*>/g, '').length;
-                    if (plainLen <= 700) {
-                        return `<div class="announcement-body text-xs leading-relaxed">${full}</div>`;
-                    }
-                    const id = 'ann-' + Math.random().toString(36).slice(2, 9);
-                    setTimeout(function () {
-                        const wrap = document.getElementById(id);
-                        if (!wrap) return;
-                        const btn = wrap.querySelector('.ann-toggle');
-                        btn.addEventListener('click', function () {
-                            const open = wrap.classList.toggle('expanded');
-                            btn.querySelector('span.txt').textContent = open ? 'Show less' : 'Read more';
-                            btn.querySelector('.material-symbols-outlined').textContent = open ? 'expand_less' : 'expand_more';
-                        });
-                    }, 0);
-                    return `<div id="${id}" class="announcement-body announcement-clamp text-xs leading-relaxed">
-                                ${full}
-                                <button type="button" class="ann-toggle mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline cursor-pointer bg-transparent border-none p-0">
-                                    <span class="txt">Read more</span>
-                                    <span class="material-symbols-outlined text-[15px]">expand_more</span>
-                                </button>
-                            </div>`;
+                    /* Box height always matches the text exactly — no clamping */
+                    return `<div class="announcement-body text-xs leading-relaxed">${renderAnnouncementBody(a.body)}</div>`;
                 }
 
                 async function loadAnnouncementsFeed() {
@@ -868,90 +847,7 @@ $csrf_token = getCsrfToken();
                 });
             }
 
-            // Notifications popover fed by campus announcements
-            var btn = document.getElementById('npc-notif-btn');
-            var pop = document.getElementById('npc-notif-popover');
-            if (!btn || !pop || typeof supabase === 'undefined') return;
-
-            var notifCache = [];
-
-            async function loadNotifications() {
-                var list = document.getElementById('npc-notif-list');
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('announcements')
-                        .select('*')
-                        .eq('status', 'published')
-                        .order('created_at', { ascending: false })
-                        .limit(8);
-                    if (error) throw error;
-                    notifCache = data || [];
-                    renderNotifications();
-                } catch (err) {
-                    if (list) list.innerHTML = '<div class="p-5 text-center text-xs text-on-surface-variant">Notifications unavailable right now.</div>';
-                }
-            }
-
-            function timeAgo(iso) {
-                var s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-                if (s < 60) return 'just now';
-                if (s < 3600) return Math.floor(s / 60) + 'm ago';
-                if (s < 86400) return Math.floor(s / 3600) + 'h ago';
-                return Math.floor(s / 86400) + 'd ago';
-            }
-
-            function renderNotifications() {
-                var list = document.getElementById('npc-notif-list');
-                var dot = document.getElementById('npc-notif-dot');
-                if (!list) return;
-                if (!notifCache.length) {
-                    list.innerHTML = '<div class="p-6 text-center flex flex-col items-center gap-2"><span class="material-symbols-outlined text-[30px] text-outline-variant">notifications_off</span><p class="text-xs text-on-surface-variant">You are all caught up.</p></div>';
-                    if (dot) dot.style.display = 'none';
-                    return;
-                }
-                list.innerHTML = notifCache.map(function (a) {
-                    var isEmerg = a.category === 'emergency';
-                    var icon = isEmerg ? 'warning' : (a.category === 'academic' ? 'school' : 'campaign');
-                    var iconColor = isEmerg ? 'text-error' : (a.category === 'academic' ? 'text-secondary' : 'text-status-info');
-                    return '<div class="flex items-start gap-3 px-4 py-3 hover:bg-surface-container-low/60 transition-colors cursor-default">' +
-                        '<span class="material-symbols-outlined ' + iconColor + ' text-[19px] mt-0.5">' + icon + '</span>' +
-                        '<div class="min-w-0">' +
-                        '<p class="text-xs font-bold text-on-surface truncate">' + (a.title || 'Announcement') + '</p>' +
-                        '<p class="text-[11px] text-on-surface-variant line-clamp-2 leading-snug mt-0.5">' + String(a.body || '').replace(/\*\*/g, '').replace(/<[^>]*>/g, '').slice(0, 90) + '</p>' +
-                        '<p class="text-[10px] font-mono text-outline mt-1">' + timeAgo(a.created_at) + '</p>' +
-                        '</div></div>';
-                }).join('');
-                if (dot) dot.style.display = '';
-            }
-
-            btn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                var isOpen = !pop.classList.contains('hidden');
-                pop.classList.toggle('hidden');
-                btn.setAttribute('aria-expanded', String(!isOpen));
-                if (!isOpen && !btn.__loadedOnce) { btn.__loadedOnce = true; loadNotifications(); }
-            });
-            document.addEventListener('click', function (e) {
-                if (!pop.classList.contains('hidden') && !pop.contains(e.target)) {
-                    pop.classList.add('hidden');
-                    btn.setAttribute('aria-expanded', 'false');
-                }
-            });
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape' && !pop.classList.contains('hidden')) {
-                    pop.classList.add('hidden');
-                    btn.setAttribute('aria-expanded', 'false');
-                }
-            });
-            var clearBtn = document.getElementById('npc-notif-clear');
-            if (clearBtn) clearBtn.addEventListener('click', function () {
-                var dot = document.getElementById('npc-notif-dot');
-                if (dot) dot.style.display = 'none';
-                if (window.notify) window.notify('All notifications marked as read.', 'success', 2500);
-            });
-
-            // Preload quietly in background
-            if (typeof supabaseClient !== 'undefined') loadNotifications();
+            /* Notifications: handled by the universal npc.js center */
         })();
     </script>
 

@@ -1365,25 +1365,7 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
 /* ------------------------------------------------------------
    21. ANNOUNCEMENT CARDS — grow with text, smooth read-more
    ------------------------------------------------------------ */
-.announcement-clamp {
-    max-height: 15rem;
-    overflow: hidden;
-    position: relative;
-    transition: max-height .45s cubic-bezier(.22,.68,.32,1);
-}
-.announcement-clamp::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; bottom: 2.2rem;
-    height: 3.5rem;
-    background: linear-gradient(to bottom, transparent, rgb(var(--surface-container-lowest-rgb)));
-    pointer-events: none;
-    transition: opacity .3s ease;
-}
-.announcement-clamp.expanded {
-    max-height: 400rem; /* effectively unlimited */
-}
-.announcement-clamp.expanded::after { opacity: 0; }
+/* (clamp removed — announcement boxes now size exactly to their text) */
 
 /* word-safe wrapping for any device */
 .announcement-content,
@@ -1391,6 +1373,4 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
     overflow-wrap: anywhere;
     word-break: break-word;
 }
-@media (prefers-reduced-motion: reduce) {
-    .announcement-clamp { transition: none; }
-}
+

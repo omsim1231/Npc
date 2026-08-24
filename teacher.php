@@ -259,6 +259,20 @@ $jsConfig = getJsConfig();
                 </div>
             </div>
 
+            <!-- Campus Bulletins (announcements feed) -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm">
+                <div class="pb-4 border-b border-outline-variant/60 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-[22px]" style="font-variation-settings: 'FILL' 1;">campaign</span>
+                        <span>Campus Bulletins</span>
+                    </h3>
+                    <span class="font-mono text-xs text-on-surface-variant font-semibold bg-surface-container px-2 py-0.5 rounded">Live</span>
+                </div>
+                <div class="pt-4 flex flex-col gap-4" id="faculty-announcements-container">
+                    <div class="text-center text-on-surface-variant text-sm py-4 animate-pulse">Loading announcements...</div>
+                </div>
+            </div>
+
             <!-- Student Consultation Appointments & Class Materials Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Left: Consultation Appointments (7 cols) -->
@@ -533,6 +547,72 @@ $jsConfig = getJsConfig();
                 console.error(err);
             }
         }
+
+
+        /* ── Faculty announcements feed (full-text cards) ── */
+        function facultyEscapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+        function facultyRenderBody(raw) {
+            if (!raw) return '<p class="text-on-surface-variant/70 italic text-xs">No announcement content.</p>';
+            let text = String(raw).trim()
+                .replace(/\s*bis_skin_checked="[^"]*"/gi, '')
+                .replace(/\s*contenteditable="[^"]*"/gi, '')
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                .replace(/on\w+="[^"]*"/gi, '');
+            if (/<(div|p|span|ul|ol|li|h[1-6]|strong|b|em|i|blockquote|table|br)/i.test(text)) {
+                return `<div class="announcement-content text-xs leading-relaxed break-words" style="overflow-wrap:anywhere;word-break:break-word;">${text}</div>`;
+            }
+            const formatted = facultyEscapeHtml(text)
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-primary">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                .replace(/• (.*?)(\n|$)/g, '<li class="ml-4 list-disc">$1</li>')
+                .replace(/\n/g, '<br>');
+            return `<div class="announcement-content text-xs leading-relaxed break-words" style="overflow-wrap:anywhere;word-break:break-word;">${formatted}</div>`;
+        }
+        async function loadFacultyAnnouncements() {
+            const container = document.getElementById('faculty-announcements-container');
+            if (!container || typeof supabase === 'undefined') return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('announcements')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+                if (error) throw error;
+                if (!data || !data.length) {
+                    container.innerHTML = '<div class="text-center text-on-surface-variant text-sm py-4">No recent announcements.</div>';
+                    return;
+                }
+                container.innerHTML = data.map(a => {
+                    const isEmergency = a.category === 'emergency';
+                    const isAcademic = a.category === 'academic';
+                    const badgeClass = isEmergency ? 'bg-error-container text-error'
+                        : (isAcademic ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container text-primary');
+                    const icon = isEmergency ? 'warning' : (isAcademic ? 'school' : 'campaign');
+                    const dateStr = new Date(a.created_at).toLocaleDateString();
+                    return `
+                    <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-outline-variant/40 hover:bg-surface-container-low transition-colors space-y-2 overflow-hidden">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${badgeClass} font-mono text-[10px] uppercase font-bold tracking-wide shrink-0">
+                                <span class="material-symbols-outlined text-[12px]">${icon}</span> ${facultyEscapeHtml(a.category)}
+                            </span>
+                            <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${dateStr}</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-primary break-words leading-snug" style="overflow-wrap:anywhere;word-break:break-word;">${facultyEscapeHtml(a.title)}</h4>
+                        <div class="announcement-body text-xs leading-relaxed">${facultyRenderBody(a.body)}</div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('Faculty announcements failed:', err);
+                container.innerHTML = '<div class="text-center text-on-surface-variant text-sm py-4">Announcements unavailable right now.</div>';
+            }
+        }
+        if (typeof supabaseClient !== 'undefined') loadFacultyAnnouncements();
 
         loadTeacherDashboard();
 
