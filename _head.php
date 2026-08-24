@@ -161,46 +161,6 @@ $__csrfToken = function_exists('getCsrfToken') ? getCsrfToken() : '';
             }, timeout);
         };
 
-        // ── Theme toggle (auto-mounts into #topbar) ────────────────────────────
-        (function () {
-            function isDark() {
-                return document.documentElement.classList.contains('dark');
-            }
-
-            function applyIcon(btn) {
-                var icon = isDark() ? 'light_mode' : 'dark_mode';
-                var label = isDark() ? 'Switch to light mode' : 'Switch to dark mode';
-                btn.innerHTML = '<span class="material-symbols-outlined">' + icon + '</span>';
-                btn.setAttribute('aria-label', label);
-                btn.setAttribute('title', label);
-            }
-
-            function toggleTheme() {
-                var html = document.documentElement;
-                html.classList.add('theme-anim');
-                html.classList.toggle('dark');
-                try { localStorage.setItem('npc-theme', isDark() ? 'dark' : 'light'); } catch (e) {}
-                var btn = document.getElementById('npc-theme-toggle');
-                if (btn) applyIcon(btn);
-                setTimeout(function () { html.classList.remove('theme-anim'); }, 500);
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                var bar = document.getElementById('topbar');
-                if (bar && !document.getElementById('npc-theme-toggle')) {
-                    var btn = document.createElement('button');
-                    btn.id = 'npc-theme-toggle';
-                    btn.type = 'button';
-                    applyIcon(btn);
-                    btn.addEventListener('click', toggleTheme);
-                    // Prefer the right-hand action cluster; fall back to the bar itself
-                    var clusters = bar.querySelectorAll(':scope > div');
-                    var target = clusters.length ? clusters[clusters.length - 1] : bar;
-                    target.prepend(btn);
-                }
-            });
-        })();
-
         // ── Entrance choreography: stagger direct children of <main> ──────────
         document.addEventListener('DOMContentLoaded', function () {
             var main = document.querySelector('main');

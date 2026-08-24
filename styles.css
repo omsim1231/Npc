@@ -1296,15 +1296,21 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
    Ensures unread counter numbers are perfectly centered and
    never clipped or covered by surrounding borders.
    ------------------------------------------------------------ */
+#npc-notif-center,
+#npc-notif-btn {
+    overflow: visible !important;
+}
+
 #npc-notif-badge, .npc-badge-pill {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: 1px;
+    right: 1px;
+    transform: translate(25%, -25%);
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
     border-radius: 9999px;
-    background-color: #dc2626 !important;
+    background-color: #ef4444 !important;
     color: #ffffff !important;
     font-size: 10px !important;
     font-weight: 800 !important;
@@ -1313,8 +1319,8 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
     align-items: center;
     justify-content: center;
     border: 2px solid rgb(var(--surface-container-lowest-rgb, 255 255 255)) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-    z-index: 30;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    z-index: 50;
     pointer-events: none;
     box-sizing: border-box;
 }
@@ -1323,11 +1329,24 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
     border-color: rgb(var(--surface-container-lowest-rgb, 15 23 42)) !important;
 }
 
-/* Announcement word-break and scroll helpers */
-.announcement-body {
+/* Announcement word-break, rich formatting and scroll helpers */
+.announcement-body, .announcement-content {
     word-break: break-word;
     overflow-wrap: anywhere;
-    white-space: pre-wrap;
+}
+.announcement-content p {
+    margin-bottom: 0.35rem;
+}
+.announcement-content p:last-child {
+    margin-bottom: 0;
+}
+.announcement-content ul, .announcement-content ol {
+    margin-left: 1.25rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+.announcement-content li {
+    margin-bottom: 0.2rem;
 }
 
 .custom-scroll::-webkit-scrollbar {

@@ -184,41 +184,44 @@ $csrf_token = getCsrfToken();
                                     <p class="text-sm text-on-surface-variant font-medium">Login to view attendance</p>
                                 </div>
                             <?php else: ?>
-                                <div class="flex flex-col md:flex-row items-center gap-8">
+                                <div class="flex flex-col sm:flex-row items-center justify-around gap-6 sm:gap-8">
                                     <!-- Donut Chart -->
                                     <div class="relative w-32 h-32 shrink-0">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                             <!-- Background Circle -->
                                             <path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
                                             <!-- Present (Green/Primary) -->
-                                            <path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-width="3.5"></path>
+                                            <path id="donut-present-path" class="text-primary transition-all duration-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3.5"></path>
                                             <!-- Late (Yellow) -->
-                                            <path class="text-secondary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-dashoffset="0" stroke-width="3.5"></path>
+                                            <path id="donut-late-path" class="text-secondary-container transition-all duration-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-dashoffset="0" stroke-width="3.5"></path>
                                             <!-- Absent (Red) -->
-                                            <path class="text-error" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-dashoffset="0" stroke-width="3.5"></path>
+                                            <path id="donut-absent-path" class="text-error transition-all duration-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="0, 100" stroke-dashoffset="0" stroke-width="3.5"></path>
                                         </svg>
-                                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span class="text-2xl font-bold text-primary">0%</span>
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                            <span id="attendance-rate-display" class="text-2xl font-bold text-primary">100%</span>
                                             <span class="text-[10px] font-mono text-on-surface-variant uppercase">Rate</span>
                                         </div>
                                     </div>
 
                                     <!-- Legend Cards -->
-                                    <div class="flex-1 w-full grid grid-cols-3 gap-3">
+                                    <div class="flex-1 w-full grid grid-cols-3 gap-2.5 sm:gap-3">
                                         <div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant/60 flex flex-col items-center text-center">
                                             <div class="w-2.5 h-2.5 rounded-full bg-primary mb-1.5"></div>
                                             <span class="font-mono text-[10px] text-on-surface-variant uppercase mb-0.5">Present</span>
-                                            <span class="text-lg font-bold text-on-surface">0%</span>
+                                            <span id="attendance-present-stat" class="text-base sm:text-lg font-bold text-on-surface">100%</span>
+                                            <span id="attendance-present-count" class="text-[10px] font-mono text-on-surface-variant/80">0 scans</span>
                                         </div>
                                         <div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant/60 flex flex-col items-center text-center">
                                             <div class="w-2.5 h-2.5 rounded-full bg-secondary-container mb-1.5"></div>
                                             <span class="font-mono text-[10px] text-on-surface-variant uppercase mb-0.5">Late</span>
-                                            <span class="text-lg font-bold text-on-surface">0%</span>
+                                            <span id="attendance-late-stat" class="text-base sm:text-lg font-bold text-on-surface">0%</span>
+                                            <span id="attendance-late-count" class="text-[10px] font-mono text-on-surface-variant/80">0 scans</span>
                                         </div>
                                         <div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant/60 flex flex-col items-center text-center">
                                             <div class="w-2.5 h-2.5 rounded-full bg-error mb-1.5"></div>
                                             <span class="font-mono text-[10px] text-on-surface-variant uppercase mb-0.5">Absent</span>
-                                            <span class="text-lg font-bold text-error">0%</span>
+                                            <span id="attendance-absent-stat" class="text-base sm:text-lg font-bold text-error">0%</span>
+                                            <span id="attendance-absent-count" class="text-[10px] font-mono text-on-surface-variant/80">0 scans</span>
                                         </div>
                                     </div>
                                 </div>
@@ -263,6 +266,7 @@ $csrf_token = getCsrfToken();
                 document.addEventListener('DOMContentLoaded', async () => {
                     loadClassesFeed();
                     loadAnnouncementsFeed();
+                    loadAttendanceOverview();
                 });
 
                 async function loadClassesFeed() {
@@ -279,21 +283,21 @@ $csrf_token = getCsrfToken();
 
                         if (data && data.length > 0) {
                             container.innerHTML = data.map(c => `
-                            <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-low/50 transition-colors">
-                                <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 rounded-xl bg-surface-container flex flex-col items-center justify-center text-primary border border-outline-variant shrink-0 font-bold">
+                            <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-low/50 transition-colors">
+                                <div class="flex items-start gap-3.5 sm:gap-4">
+                                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-surface-container flex flex-col items-center justify-center text-primary border border-outline-variant shrink-0 font-bold">
                                         <span class="font-mono text-xs leading-tight">${escapeHtml(c.code)}</span>
                                     </div>
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <h4 class="text-base font-semibold text-on-surface">${escapeHtml(c.title)}</h4>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                                            <h4 class="text-sm sm:text-base font-semibold text-on-surface break-words">${escapeHtml(c.title)}</h4>
                                             <span class="px-2 py-0.5 rounded-full bg-status-info/10 text-status-info font-mono text-[10px] uppercase font-bold border border-status-info/20">${escapeHtml(c.section || '01')}</span>
                                         </div>
-                                        <div class="flex items-center gap-3 font-mono text-xs text-on-surface-variant">
+                                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-on-surface-variant">
                                             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">person</span> ${escapeHtml(c.instructor || 'Faculty')}</span>
-                                            <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+                                            <span class="hidden sm:inline w-1 h-1 rounded-full bg-outline-variant"></span>
                                             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">meeting_room</span> ${escapeHtml(c.room || 'TBA')}</span>
-                                            <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+                                            <span class="hidden sm:inline w-1 h-1 rounded-full bg-outline-variant"></span>
                                             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> ${escapeHtml(c.schedule_day || 'TBA')}</span>
                                         </div>
                                     </div>
@@ -309,14 +313,103 @@ $csrf_token = getCsrfToken();
                     }
                 }
 
-                function formatMarkdown(text) {
-                    if (!text) return '';
-                    return escapeHtml(text)
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>')
-                        .replace(/• (.*?)(\n|$)/g, '<li class="ml-3 list-disc">$1</li>')
+                async function loadAttendanceOverview() {
+                    try {
+                        const res = await fetch('api_student.php?action=get_attendance_history', {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const d = await res.json();
+                        
+                        let present = 0, late = 0, absent = 0, total = 0, rate = 100;
+                        if (d && d.success && d.stats) {
+                            present = parseInt(d.stats.present || 0, 10);
+                            late = parseInt(d.stats.late || 0, 10);
+                            absent = parseInt(d.stats.absent || 0, 10);
+                            total = parseInt(d.stats.total_checkins || 0, 10);
+                            if (!total) total = present + late + absent;
+                            rate = total > 0 ? parseFloat(d.stats.rate) || 0 : 100;
+                        }
+
+                        const presentPct = total > 0 ? Math.round((present / total) * 100) : 100;
+                        const latePct = total > 0 ? Math.round((late / total) * 100) : 0;
+                        const absentPct = total > 0 ? Math.round((absent / total) * 100) : 0;
+
+                        const rateDisplay = document.getElementById('attendance-rate-display');
+                        if (rateDisplay) rateDisplay.textContent = (total > 0 ? Math.round(rate) : 100) + '%';
+
+                        const pStat = document.getElementById('attendance-present-stat');
+                        if (pStat) pStat.textContent = presentPct + '%';
+                        const pCount = document.getElementById('attendance-present-count');
+                        if (pCount) pCount.textContent = present + ' scans';
+
+                        const lStat = document.getElementById('attendance-late-stat');
+                        if (lStat) lStat.textContent = latePct + '%';
+                        const lCount = document.getElementById('attendance-late-count');
+                        if (lCount) lCount.textContent = late + ' scans';
+
+                        const aStat = document.getElementById('attendance-absent-stat');
+                        if (aStat) aStat.textContent = absentPct + '%';
+                        const aCount = document.getElementById('attendance-absent-count');
+                        if (aCount) aCount.textContent = absent + ' scans';
+
+                        // Animate SVG Donut Paths
+                        const pPath = document.getElementById('donut-present-path');
+                        if (pPath) pPath.setAttribute('stroke-dasharray', `${presentPct}, 100`);
+
+                        const lPath = document.getElementById('donut-late-path');
+                        if (lPath) {
+                            lPath.setAttribute('stroke-dasharray', `${latePct}, 100`);
+                            lPath.setAttribute('stroke-dashoffset', `-${presentPct}`);
+                        }
+
+                        const aPath = document.getElementById('donut-absent-path');
+                        if (aPath) {
+                            aPath.setAttribute('stroke-dasharray', `${absentPct}, 100`);
+                            aPath.setAttribute('stroke-dashoffset', `-${presentPct + latePct}`);
+                        }
+                    } catch (e) {
+                        console.warn('Attendance stats using default fallback:', e);
+                    }
+                }
+
+                function renderAnnouncementBody(raw) {
+                    if (!raw) return '<p class="text-on-surface-variant/70 italic text-xs">No announcement content.</p>';
+                    let text = String(raw).trim();
+
+                    // Strip browser extension artifacts
+                    text = text.replace(/\s*bis_skin_checked="[^"]*"/gi, '');
+                    text = text.replace(/\s*contenteditable="[^"]*"/gi, '');
+                    text = text.replace(/\s*spellcheck="[^"]*"/gi, '');
+
+                    // Check if content has HTML markup
+                    if (/<(div|p|span|ul|ol|li|h[1-6]|strong|b|em|i|blockquote|table|br)/i.test(text)) {
+                        // Strip risky tags
+                        text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                        text = text.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+                        text = text.replace(/on\w+="[^"]*"/gi, '');
+
+                        // Normalize alert boxes from editor to theme-aware classes
+                        text = text.replace(/style="[^"]*background-color:\s*#fee2e2[^"]*"/gi, 'class="p-3 mb-2 rounded-xl bg-error/15 border-l-4 border-error text-on-surface text-xs"');
+                        text = text.replace(/style="[^"]*background-color:\s*#eff4ff[^"]*"/gi, 'class="p-3 mb-2 rounded-xl bg-primary/15 border-l-4 border-primary text-on-surface text-xs"');
+                        text = text.replace(/style="[^"]*background-color:\s*#fef3c7[^"]*"/gi, 'class="p-3 mb-2 rounded-xl bg-secondary-container/30 border-l-4 border-secondary text-on-surface text-xs"');
+
+                        // Style lists cleanly
+                        text = text.replace(/<ul\b([^>]*)>/gi, '<ul class="list-disc ml-5 my-1 space-y-1 text-xs" $1>');
+                        text = text.replace(/<ol\b([^>]*)>/gi, '<ol class="list-decimal ml-5 my-1 space-y-1 text-xs" $1>');
+
+                        return `<div class="announcement-content text-xs leading-relaxed break-words" style="overflow-wrap:anywhere; word-break:break-word;">${text}</div>`;
+                    }
+
+                    // Plain text or markdown formatting
+                    const escaped = escapeHtml(text);
+                    const formatted = escaped
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-primary">$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                        .replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/gi, '<u class="underline">$1</u>')
+                        .replace(/• (.*?)(\n|$)/g, '<li class="ml-4 list-disc">$1</li>')
                         .replace(/\n/g, '<br>');
+
+                    return `<div class="announcement-content text-xs leading-relaxed break-words" style="overflow-wrap:anywhere; word-break:break-word;">${formatted}</div>`;
                 }
 
                 async function loadAnnouncementsFeed() {
@@ -345,13 +438,15 @@ $csrf_token = getCsrfToken();
                                 return `
                                 <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-outline-variant/40 hover:bg-surface-container-low transition-colors space-y-2 overflow-hidden">
                                     <div class="flex items-center justify-between gap-2">
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${badgeClass} font-mono text-[10px] uppercase font-bold tracking-wide">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${badgeClass} font-mono text-[10px] uppercase font-bold tracking-wide shrink-0">
                                             <span class="material-symbols-outlined text-[12px]">${icon}</span> ${escapeHtml(a.category)}
                                         </span>
                                         <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${dateStr}</span>
                                     </div>
                                     <h4 class="text-sm font-bold text-primary break-words leading-snug" style="overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(a.title)}</h4>
-                                    <div class="text-xs text-on-surface-variant leading-relaxed break-words max-h-36 overflow-y-auto pr-1 custom-scroll" style="overflow-wrap:anywhere; word-break:break-word;">${formatMarkdown(a.body)}</div>
+                                    <div class="max-h-48 overflow-y-auto pr-1 custom-scroll">
+                                        ${renderAnnouncementBody(a.body)}
+                                    </div>
                                 </div>
                                 `;
                             }).join('');

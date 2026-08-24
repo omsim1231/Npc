@@ -592,7 +592,7 @@
         wrap.className = 'relative';
         wrap.innerHTML =
             '<button type="button" id="npc-notif-btn" data-tip="Notifications" aria-label="Notifications"' +
-            ' class="relative p-2 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer press ripple">' +
+            ' class="relative p-2 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer press" style="overflow:visible;">' +
             '<span class="material-symbols-outlined" style="font-size:19px;">notifications</span>' +
             '<span id="npc-notif-badge" class="npc-badge-pill hidden">0</span>' +
             '</button>' +
