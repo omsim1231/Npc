@@ -135,12 +135,6 @@ $jsConfig = getJsConfig();
 </head>
 <body class="font-sans min-h-screen antialiased">
 
-    <!-- Floating dark-mode toggle -->
-    <button id="npc-login-theme" type="button" aria-label="Toggle dark mode"
-            class="fixed top-4 right-4 z-50 w-11 h-11 rounded-full glass-chip text-white flex items-center justify-center cursor-pointer press ripple hover:scale-105 transition-transform">
-        <span class="material-symbols-outlined text-[20px]"></span>
-    </button>
-
     <!-- ══════════ Aurora Hero Stage ══════════ -->
     <div class="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4"
          style="background: linear-gradient(150deg, #001736 0%, #012a5e 45%, #06457f 80%, #0a4d8c 100%);">
@@ -282,30 +276,6 @@ $jsConfig = getJsConfig();
     </div>
 
     <script>
-        // Dark-mode toggle
-        (function () {
-            var btn = document.getElementById('npc-login-theme');
-            if (!btn) return;
-            function paint() {
-                var icon = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
-                btn.querySelector('.material-symbols-outlined').textContent = icon;
-                // keep card readable in light mode too
-                var card = document.getElementById('npc-login-card');
-                if (!document.documentElement.classList.contains('dark')) {
-                    card.style.background = 'rgba(255,255,255,0.07)';
-                }
-            }
-            paint();
-            btn.addEventListener('click', function () {
-                var html = document.documentElement;
-                html.classList.add('theme-anim');
-                html.classList.toggle('dark');
-                try { localStorage.setItem('npc-theme', html.classList.contains('dark') ? 'dark' : 'light'); } catch (e) {}
-                paint();
-                setTimeout(function () { html.classList.remove('theme-anim'); }, 500);
-            });
-        })();
-
         // Supabase config injected server-side (publishable key only)
         const supabaseUrl = <?= json_encode($jsConfig['url']) ?>;
         const supabaseKey = <?= json_encode($jsConfig['key']) ?>;

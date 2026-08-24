@@ -233,7 +233,7 @@ $selected_class_id = isset($_GET['class_id']) ? $_GET['class_id'] : '';
             </div>
 
             <div class="flex-1 overflow-auto">
-                <table class="w-full text-left border-collapse text-xs">
+                <div class="overflow-x-auto -mx-1 px-1"><table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-gray-100 font-mono font-bold text-gray-700">
                             <th class="py-2.5 px-4 border-b">Student #</th>
@@ -248,7 +248,7 @@ $selected_class_id = isset($_GET['class_id']) ? $_GET['class_id'] : '';
                     <tbody id="modal-review-tbody" class="divide-y text-xs">
                         <tr><td colspan="7" class="p-6 text-center text-gray-400">Loading student grades...</td></tr>
                     </tbody>
-                </table>
+                </table></div>
             </div>
 
             <div class="flex items-center justify-between pt-3 border-t">

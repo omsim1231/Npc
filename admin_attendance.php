@@ -243,7 +243,7 @@ $csrf_token = getCsrfToken();
                                         </div>
 
                                         <div class="flex-1 overflow-y-auto">
-                                                <table class="w-full text-left border-collapse">
+                                                <div class="overflow-x-auto -mx-1 px-1"><table class="w-full text-left border-collapse">
                                                         <thead>
                                                                 <tr class="bg-surface-container-low font-mono text-xs text-on-surface uppercase tracking-wider">
                                                                         <th class="py-3 px-5 font-semibold border-b border-outline-variant">Student Name</th>
@@ -261,7 +261,7 @@ $csrf_token = getCsrfToken();
                                                                         </td>
                                                                 </tr>
                                                         </tbody>
-                                                </table>
+                                                </table></div>
                                         </div>
                                 </div>
                         </div>

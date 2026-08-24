@@ -1171,16 +1171,20 @@ html.dark .hover\:text-gray-800:hover { color: rgb(var(--on-surface-rgb)); }
 /* Excel-style gradebook surfaces */
 html.dark .bg-excel-light { background-color: rgb(var(--excel-light-rgb)) !important; }
 
-/* Mobile drawer for shared sidebar (npc.js toggles .open) */
-.npc-drawer {
+/* Mobile drawer for shared sidebar (npc.js toggles .open).
+   IMPORTANT: overrides Tailwind's .hidden on mobile — without
+   display:flex !important the drawer could never appear. */
+#npc-sidebar.npc-drawer {
+    display: flex !important;
     transform: translateX(-100%);
     transition: transform .3s cubic-bezier(.22,.68,.32,1);
     z-index: 46;
+    box-shadow: 0 0 60px rgba(0, 10, 30, .5);
 }
 @media (min-width: 1024px) {
-    .npc-drawer { transform: none !important; }
+    #npc-sidebar.npc-drawer { transform: none !important; box-shadow: none; }
 }
-.npc-drawer.open { transform: translateX(0); }
+#npc-sidebar.npc-drawer.open { transform: translateX(0); }
 
 /* ============================================================
    19. PAGE-LEVEL COMPONENT DARK OVERRIDES
@@ -1356,4 +1360,37 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
 .custom-scroll::-webkit-scrollbar-thumb {
     background-color: rgb(var(--outline-variant-rgb));
     border-radius: 4px;
+}
+
+/* ------------------------------------------------------------
+   21. ANNOUNCEMENT CARDS — grow with text, smooth read-more
+   ------------------------------------------------------------ */
+.announcement-clamp {
+    max-height: 15rem;
+    overflow: hidden;
+    position: relative;
+    transition: max-height .45s cubic-bezier(.22,.68,.32,1);
+}
+.announcement-clamp::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 2.2rem;
+    height: 3.5rem;
+    background: linear-gradient(to bottom, transparent, rgb(var(--surface-container-lowest-rgb)));
+    pointer-events: none;
+    transition: opacity .3s ease;
+}
+.announcement-clamp.expanded {
+    max-height: 400rem; /* effectively unlimited */
+}
+.announcement-clamp.expanded::after { opacity: 0; }
+
+/* word-safe wrapping for any device */
+.announcement-content,
+.announcement-body {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+@media (prefers-reduced-motion: reduce) {
+    .announcement-clamp { transition: none; }
 }

@@ -393,14 +393,14 @@ $jsConfig = getJsConfig();
             <!-- Spreadsheet Grid Container -->
             <div class="bg-white border border-outline-variant rounded-2xl overflow-hidden shadow-sm excel-container">
                 <div id="grid-scroll-viewport" class="overflow-auto max-h-[600px] outline-none" tabindex="0" onkeydown="onGridKeyDown(event)">
-                    <table class="excel-table" id="excel-main-grid">
+                    <div class="overflow-x-auto -mx-1 px-1"><table class="excel-table" id="excel-main-grid">
                         <thead id="excel-grid-thead">
                             <!-- Headers dynamically injected -->
                         </thead>
                         <tbody id="excel-grid-tbody">
                             <!-- Cell rows dynamically injected -->
                         </tbody>
-                    </table>
+                    </table></div>
                 </div>
 
                 <!-- Multi-Sheet Tabs Bar & Live Stats Footer -->
@@ -1456,11 +1456,11 @@ $jsConfig = getJsConfig();
             } else {
                 /* Excel-compatible HTML table (.xls) — preserves columns */
                 let html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>';
-                html += '<table border="1"><thead><tr>' + headers.map(h => '<th style="background:#107c41;color:#fff;">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>';
+                html += '<div class="overflow-x-auto -mx-1 px-1"><table border="1"><thead><tr>' + headers.map(h => '<th style="background:#107c41;color:#fff;">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>';
                 sheet.data.forEach(r => {
                     html += '<tr>' + r.map((v, ci) => '<td' + (ci >= 2 && ci <= 4 ? ' style="mso-number-format:\'0.00\'"' : '') + '>' + esc(v) + '</td>').join('') + '</tr>';
                 });
-                html += '</tbody></table></body></html>';
+                html += '</tbody></table></div></body></html>';
                 downloadBlob(html, 'npc-grades-' + cls + '.xls', 'application/vnd.ms-excel');
             }
             showToast('Exported ' + fmt.toUpperCase() + ' ✓', 'success');

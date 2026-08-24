@@ -561,6 +561,13 @@
             sidebar.classList.add('open');
             if (overlay) overlay.classList.remove('hidden');
         });
+        /* Phone UX: close the drawer after choosing a destination */
+        Array.prototype.forEach.call(sidebar.querySelectorAll('a'), function (a) {
+            a.addEventListener('click', function () {
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.add('hidden');
+            });
+        });
         if (overlay) overlay.addEventListener('click', function () {
             sidebar.classList.remove('open');
             overlay.classList.add('hidden');

@@ -253,7 +253,9 @@ $csrf_token = getCsrfToken();
             <script>
                 const supabaseUrl = <?= json_encode($jsConfig['url']) ?>;
                 const supabaseKey = <?= json_encode($jsConfig['key']) ?>;
-                const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                let supabaseClient = null;
+                try { supabaseClient = supabase.createClient(supabaseUrl, supabaseKey); }
+                catch (e) { console.warn('Supabase init failed:', e); }
 
                 function escapeHtml(text) {
                     if (!text) return '';
@@ -265,13 +267,28 @@ $csrf_token = getCsrfToken();
                 // Fetch dynamic data for dashboard
                 document.addEventListener('DOMContentLoaded', async () => {
                     loadClassesFeed();
-                    loadAnnouncementsFeed();
-                    loadAttendanceOverview();
+                    try { loadAnnouncementsFeed(); } catch (e) { console.warn('announcements:', e); }
+                    try { loadAttendanceOverview(); } catch (e) { console.warn('attendance:', e); }
                 });
+
+                /* Donut safety: recompute on resize/rotation so the chart
+                   never renders broken on phones. */
+                (function () {
+                    var t = null;
+                    window.addEventListener('resize', function () {
+                        clearTimeout(t);
+                        t = setTimeout(function () {
+                            var p = document.getElementById('donut-present-path');
+                            if (p && typeof loadAttendanceOverview === 'function') {
+                                try { loadAttendanceOverview(); } catch (e) { /* noop */ }
+                            }
+                        }, 250);
+                    });
+                })();
 
                 async function loadClassesFeed() {
                     const container = document.getElementById('classes-container');
-                    if (!container) return;
+                    if (!container || !supabaseClient) return;
                     try {
                         const { data, error } = await supabaseClient
                             .from('classes')
@@ -412,9 +429,37 @@ $csrf_token = getCsrfToken();
                     return `<div class="announcement-content text-xs leading-relaxed break-words" style="overflow-wrap:anywhere; word-break:break-word;">${formatted}</div>`;
                 }
 
+                /* Announcement cards grow with their text. Very long posts
+                   start collapsed (~12 lines) with a smooth Read-more. */
+                function buildAnnouncementCard(a) {
+                    const full = renderAnnouncementBody(a.body);
+                    const plainLen = String(a.body || '').replace(/<[^>]*>/g, '').length;
+                    if (plainLen <= 700) {
+                        return `<div class="announcement-body text-xs leading-relaxed">${full}</div>`;
+                    }
+                    const id = 'ann-' + Math.random().toString(36).slice(2, 9);
+                    setTimeout(function () {
+                        const wrap = document.getElementById(id);
+                        if (!wrap) return;
+                        const btn = wrap.querySelector('.ann-toggle');
+                        btn.addEventListener('click', function () {
+                            const open = wrap.classList.toggle('expanded');
+                            btn.querySelector('span.txt').textContent = open ? 'Show less' : 'Read more';
+                            btn.querySelector('.material-symbols-outlined').textContent = open ? 'expand_less' : 'expand_more';
+                        });
+                    }, 0);
+                    return `<div id="${id}" class="announcement-body announcement-clamp text-xs leading-relaxed">
+                                ${full}
+                                <button type="button" class="ann-toggle mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline cursor-pointer bg-transparent border-none p-0">
+                                    <span class="txt">Read more</span>
+                                    <span class="material-symbols-outlined text-[15px]">expand_more</span>
+                                </button>
+                            </div>`;
+                }
+
                 async function loadAnnouncementsFeed() {
                     const container = document.getElementById('announcements-container');
-                    if (!container) return;
+                    if (!container || !supabaseClient) return;
                     try {
                         const { data, error } = await supabaseClient
                             .from('announcements')
@@ -444,9 +489,7 @@ $csrf_token = getCsrfToken();
                                         <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${dateStr}</span>
                                     </div>
                                     <h4 class="text-sm font-bold text-primary break-words leading-snug" style="overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(a.title)}</h4>
-                                    <div class="max-h-48 overflow-y-auto pr-1 custom-scroll">
-                                        ${renderAnnouncementBody(a.body)}
-                                    </div>
+                                    ${buildAnnouncementCard(a)}
                                 </div>
                                 `;
                             }).join('');
@@ -943,9 +986,9 @@ $csrf_token = getCsrfToken();
                     '  </div>' +
                     '  <div class="p-6 overflow-y-auto flex flex-col gap-4 text-sm">' +
                     '    <p class="text-xs text-on-surface-variant">Enter final grades per subject on the Philippine 5-point scale (lower is better). Untick a row to exclude it.</p>' +
-                    '    <table class="w-full text-left"><thead><tr class="font-mono text-[10px] uppercase text-on-surface-variant tracking-wider">' +
+                    '    <div class="overflow-x-auto -mx-1 px-1"><table class="w-full text-left"><thead><tr class="font-mono text-[10px] uppercase text-on-surface-variant tracking-wider">' +
                     '      <th class="pb-2">Subject</th><th class="pb-2 text-center">Final Grade</th><th class="pb-2 text-center">Units</th><th class="pb-2 text-center">Include</th><th></th>' +
-                    '    </tr></thead><tbody id="npc-gwa-body"></tbody></table>' +
+                    '    </tr></thead><tbody id="npc-gwa-body"></tbody></table></div>' +
                     '    <button id="npc-gwa-addrow" class="self-start inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline cursor-pointer"><span class="material-symbols-outlined text-[16px]">add_circle</span> Add subject</button>' +
                     '    <div class="rounded-2xl p-5 text-center" style="background:linear-gradient(135deg, rgb(var(--primary-rgb)/.08), rgb(var(--secondary-rgb)/.10));border:1px solid rgb(var(--outline-variant-rgb));">' +
                     '      <p class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Your General Weighted Average</p>' +
