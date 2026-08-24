@@ -1,0 +1,22 @@
+# Environment configuration
+.env
+.env.local
+.env.*.local
+
+# Database
+app.db
+*.sqlite
+*.sqlite3
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE and agent files
+.agents/
+.vscode/
+.idea/
