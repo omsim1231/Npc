@@ -320,13 +320,13 @@ $jsConfig = getJsConfig();
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
 
-                // Use ONE stable origin for redirectTo so it matches the Supabase
-                // redirect allow-list regardless of how the user reached this page.
-                const base = 'http://localhost' + (window.location.port ? ':' + window.location.port : '');
+                // Use the current origin so it works seamlessly on localhost:8000,
+                // Cloudflare tunnels, or any production domain.
+                const origin = window.location.origin;
                 const { error } = await supabaseClient.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: base + '/auth_callback.php',
+                        redirectTo: origin + '/auth_callback.php',
                         queryParams: { prompt: 'select_account' }
                     }
                 });
