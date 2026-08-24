@@ -96,26 +96,7 @@ $activeHref = isset($ALIASES[$cur]) ? $ALIASES[$cur] : $cur;
     </div>
 
     <div class="px-4 mt-auto pt-4 border-t border-white/10 space-y-1">
-        <?php if ($NPC_PORTAL !== 'admin'): ?>
-        <!-- Admins can enter; others are bounced by the guards -->
-        <a href="admin.php" class="npc-side-link" title="Administrators only">
-            <span class="material-symbols-outlined text-[20px]">shield_person</span>
-            <span>Admin Portal</span>
-        </a>
-        <?php endif; ?>
-        <?php if ($NPC_PORTAL === 'faculty'): ?>
-        <a href="index.php" class="npc-side-link">
-            <span class="material-symbols-outlined text-[20px]">person</span>
-            <span>Student View</span>
-        </a>
-        <?php endif; ?>
-        <?php if ($NPC_PORTAL === 'student'): ?>
-        <a href="teacher.php" class="npc-side-link" title="Faculty only">
-            <span class="material-symbols-outlined text-[20px]">cast_for_education</span>
-            <span>Faculty Portal</span>
-        </a>
-        <?php endif; ?>
-        <a href="/logout.php" class="npc-side-link" style="color:#ff8a80;">
+        <a href="/logout.php" class="npc-side-link hover:!bg-red-500/20 text-red-300 hover:!text-red-200 transition-colors">
             <span class="material-symbols-outlined text-[20px]">logout</span>
             <span>Sign Out</span>
         </a>

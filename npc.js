@@ -594,7 +594,7 @@
             '<button type="button" id="npc-notif-btn" data-tip="Notifications" aria-label="Notifications"' +
             ' class="relative p-2 rounded-full border border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer press ripple">' +
             '<span class="material-symbols-outlined" style="font-size:19px;">notifications</span>' +
-            '<span id="npc-notif-badge" class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-error text-white text-[9px] font-bold flex items-center justify-center hidden">0</span>' +
+            '<span id="npc-notif-badge" class="npc-badge-pill hidden">0</span>' +
             '</button>' +
             '<div id="npc-notif-panel" class="npc-popover hidden" style="min-width:340px;">' +
             '<div class="npc-popover-arrow"></div>' +
@@ -602,7 +602,7 @@
             '<p class="text-sm font-bold text-primary">Notifications</p>' +
             '<button id="npc-notif-markall" class="text-[11px] font-mono font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">MARK ALL READ</button>' +
             '</div>' +
-            '<div id="npc-notif-list" class="max-h-96 overflow-y-auto divide-y divide-outline-variant/40">' +
+            '<div id="npc-notif-list" class="max-h-96 overflow-y-auto divide-y divide-outline-variant/40 custom-scroll">' +
             '<div class="p-5 text-center text-xs text-on-surface-variant animate-pulse">Loading…</div>' +
             '</div>' +
             '<div class="px-4 py-2 text-center bg-surface-subtle border-t border-outline-variant/60">' +
@@ -632,8 +632,12 @@
         }
         function paintBadge() {
             var n = unreadCount();
-            if (n > 0) { badge.textContent = n > 9 ? '9+' : String(n); badge.classList.remove('hidden'); }
-            else badge.classList.add('hidden');
+            if (n > 0) { 
+                badge.textContent = n > 9 ? '9+' : String(n); 
+                badge.classList.remove('hidden'); 
+            } else {
+                badge.classList.add('hidden');
+            }
         }
         function timeAgo(iso) {
             var s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -657,10 +661,10 @@
                 var icon = a.category === 'emergency' ? 'warning' : (a.category === 'academic' ? 'school' : 'campaign');
                 var color = a.category === 'emergency' ? 'text-error' : (a.category === 'academic' ? 'text-secondary' : 'text-status-info');
                 return '<div class="npc-notif-item flex items-start gap-3 px-4 py-3 hover:bg-surface-container-low/60 transition-colors cursor-pointer' + (unread ? ' bg-primary/5' : '') + '" data-id="' + esc(a.id) + '">' +
-                    '<span class="material-symbols-outlined ' + color + ' text-[19px] mt-0.5">' + icon + '</span>' +
-                    '<div class="min-w-0 flex-1">' +
-                    '<p class="text-xs font-bold text-on-surface truncate">' + (unread ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-error mr-1.5 align-middle"></span>' : '') + esc(a.title) + '</p>' +
-                    '<p class="text-[11px] text-on-surface-variant line-clamp-2 leading-snug mt-0.5">' + esc(a.excerpt) + '</p>' +
+                    '<span class="material-symbols-outlined ' + color + ' text-[19px] mt-0.5 shrink-0">' + icon + '</span>' +
+                    '<div class="min-w-0 flex-1 overflow-hidden">' +
+                    '<p class="text-xs font-bold text-on-surface break-words leading-tight">' + (unread ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-error mr-1.5 align-middle"></span>' : '') + esc(a.title) + '</p>' +
+                    '<p class="text-[11px] text-on-surface-variant break-words leading-snug mt-1" style="overflow-wrap:anywhere;">' + esc(a.excerpt) + '</p>' +
                     '<p class="text-[10px] font-mono text-outline mt-1">' + timeAgo(a.created_at) + '</p>' +
                     '</div></div>';
             }).join('');

@@ -638,8 +638,8 @@ $csrf_token = getCsrfToken();
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${a.category === 'emergency' ? 'bg-error/20 text-error' : 'bg-primary/10 text-primary'}">${a.category}</span>
                             <span class="text-xs text-on-surface-variant font-mono">${new Date(a.created_at).toLocaleDateString()}</span>
                         </div>
-                        <h4 class="font-bold text-sm text-primary">${a.title}</h4>
-                        <div class="text-xs text-on-surface-variant line-clamp-2 max-w-xl">${a.body}</div>
+                        <h4 class="font-bold text-sm text-primary break-words" style="overflow-wrap:anywhere;">${a.title}</h4>
+                        <div class="text-xs text-on-surface-variant line-clamp-2 max-w-xl break-words" style="overflow-wrap:anywhere;">${a.body}</div>
                     </div>
                     <button onclick="deleteAnnouncement('${a.id}')" class="text-error hover:bg-error/10 p-2 rounded-lg transition-colors" title="Delete">
                         <span class="material-symbols-outlined text-[18px]">delete</span>

@@ -35,38 +35,11 @@ $csrf_token = getCsrfToken();
                 <h2 class="text-xl font-bold text-primary hidden lg:block" id="page-title">Dashboard</h2>
             </div>
 
-            <div class="flex items-center gap-4">
-                <!-- Notifications (functional popover) -->
-                <div class="relative" id="npc-notif-wrap">
-                    <button id="npc-notif-btn" data-tip="Notifications" aria-label="Notifications" aria-expanded="false"
-                            class="relative p-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer rounded-full hover:bg-surface-container-low ripple">
-                        <span class="material-symbols-outlined text-[22px]">notifications</span>
-                        <span id="npc-notif-dot" class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-white animate-pulse-dot"></span>
-                    </button>
-                    <div id="npc-notif-popover" class="npc-popover hidden" role="dialog" aria-label="Notifications">
-                        <div class="npc-popover-arrow"></div>
-                        <div class="px-4 py-3 border-b border-outline-variant/60 flex items-center justify-between bg-surface-subtle">
-                            <p class="text-sm font-bold text-primary">Notifications</p>
-                            <button id="npc-notif-clear" class="text-[11px] font-mono font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">MARK ALL READ</button>
-                        </div>
-                        <div id="npc-notif-list" class="max-h-80 overflow-y-auto divide-y divide-outline-variant/40">
-                            <div class="p-5 text-center text-xs text-on-surface-variant animate-pulse">Loading notifications…</div>
-                        </div>
-                        <?php if (($_SESSION['role'] ?? '') === 'admin'): ?><a href="admin_announcements.php" class="block px-4 py-2.5 text-center text-[11px] font-mono font-bold text-primary bg-surface-subtle border-t border-outline-variant/60 hover:bg-surface-container-low transition-colors">VIEW ANNOUNCEMENTS</a><?php endif; ?>
-                    </div>
-                </div>
-
-                <button id="npc-focus-toggle" data-tip="Focus mode" aria-label="Toggle focus mode"
-                        class="hidden sm:inline-flex p-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer rounded-full hover:bg-surface-container-low ripple press">
-                    <span class="material-symbols-outlined text-[22px]">center_focus_strong</span>
-                </button>
-
-                <div class="flex items-center gap-3">
-                    <span class="font-mono text-xs font-semibold bg-surface-container px-3 py-1.5 rounded-md border border-outline-variant text-primary" id="user-id-chip">ID: <?= htmlspecialchars($user_id_display) ?></span>
-                    <img alt="User profile avatar" class="w-9 h-9 rounded-full object-cover border border-outline-variant shadow-sm"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY0YlFx4kB5x_Rj0yQKvW09upvbRIgsxiTOfv_YigLlswS0RXYGufPqUxoUuVd_bLZ_KE0GB0Ptj2-vztXffkP_cnsXegpkXH74h3zlnDr9hKjw2qrYP-VCz3m7k_WVJkoXu3TTogTQrvCuK0foEFWF6UW_ls96NG-zedSKfDJmwR-nGFSKnjpKJtj_siJzuRiXlEkZKKfUHgQqSYXq-qqp9U-UFk-qgYsAClMs8P3C9NGcDm1eQMFNg">
-                    <span class="text-sm font-semibold text-primary hidden sm:inline" id="user-name-display"><?= htmlspecialchars($raw_name) ?></span>
-                </div>
+            <div class="flex items-center gap-3">
+                <span class="font-mono text-xs font-semibold bg-surface-container px-3 py-1.5 rounded-md border border-outline-variant text-primary" id="user-id-chip">ID: <?= htmlspecialchars($user_id_display) ?></span>
+                <img alt="User profile avatar" class="w-9 h-9 rounded-full object-cover border border-outline-variant shadow-sm"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDY0YlFx4kB5x_Rj0yQKvW09upvbRIgsxiTOfv_YigLlswS0RXYGufPqUxoUuVd_bLZ_KE0GB0Ptj2-vztXffkP_cnsXegpkXH74h3zlnDr9hKjw2qrYP-VCz3m7k_WVJkoXu3TTogTQrvCuK0foEFWF6UW_ls96NG-zedSKfDJmwR-nGFSKnjpKJtj_siJzuRiXlEkZKKfUHgQqSYXq-qqp9U-UFk-qgYsAClMs8P3C9NGcDm1eQMFNg">
+                <span class="text-sm font-semibold text-primary hidden sm:inline" id="user-name-display"><?= htmlspecialchars($raw_name) ?></span>
             </div>
         </header>
 
@@ -264,7 +237,7 @@ $csrf_token = getCsrfToken();
                                 <span class="font-mono text-xs text-on-surface-variant font-semibold bg-surface-container px-2 py-0.5 rounded">Live</span>
                             </div>
 
-                            <div class="py-4 flex flex-col gap-4" id="announcements-container">
+                            <div class="py-2 flex flex-col gap-3.5 max-h-[520px] overflow-y-auto pr-1 custom-scroll" id="announcements-container">
                                 <div class="text-center text-on-surface-variant text-sm py-4">
                                     <span class="animate-pulse">Loading announcements...</span>
                                 </div>
@@ -278,6 +251,13 @@ $csrf_token = getCsrfToken();
                 const supabaseUrl = <?= json_encode($jsConfig['url']) ?>;
                 const supabaseKey = <?= json_encode($jsConfig['key']) ?>;
                 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    var d = document.createElement('div');
+                    d.textContent = String(text);
+                    return d.innerHTML;
+                }
 
                 // Fetch dynamic data for dashboard
                 document.addEventListener('DOMContentLoaded', async () => {
@@ -302,19 +282,19 @@ $csrf_token = getCsrfToken();
                             <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-container-low/50 transition-colors">
                                 <div class="flex items-start gap-4">
                                     <div class="w-12 h-12 rounded-xl bg-surface-container flex flex-col items-center justify-center text-primary border border-outline-variant shrink-0 font-bold">
-                                        <span class="font-mono text-xs leading-tight">${c.code}</span>
+                                        <span class="font-mono text-xs leading-tight">${escapeHtml(c.code)}</span>
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
-                                            <h4 class="text-base font-semibold text-on-surface">${c.title}</h4>
-                                            <span class="px-2 py-0.5 rounded-full bg-status-info/10 text-status-info font-mono text-[10px] uppercase font-bold border border-status-info/20">${c.section || '01'}</span>
+                                            <h4 class="text-base font-semibold text-on-surface">${escapeHtml(c.title)}</h4>
+                                            <span class="px-2 py-0.5 rounded-full bg-status-info/10 text-status-info font-mono text-[10px] uppercase font-bold border border-status-info/20">${escapeHtml(c.section || '01')}</span>
                                         </div>
                                         <div class="flex items-center gap-3 font-mono text-xs text-on-surface-variant">
-                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">person</span> ${c.instructor || 'Faculty'}</span>
+                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">person</span> ${escapeHtml(c.instructor || 'Faculty')}</span>
                                             <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">meeting_room</span> ${c.room || 'TBA'}</span>
+                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">meeting_room</span> ${escapeHtml(c.room || 'TBA')}</span>
                                             <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
-                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> ${c.schedule_day || 'TBA'}</span>
+                                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span> ${escapeHtml(c.schedule_day || 'TBA')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -331,11 +311,12 @@ $csrf_token = getCsrfToken();
 
                 function formatMarkdown(text) {
                     if (!text) return '';
-                    return text
+                    return escapeHtml(text)
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/<u>(.*?)<\/u>/g, '<u>$1</u>')
-                        .replace(/• (.*?)(\n|$)/g, '<li class="ml-3 list-disc">$1</li>');
+                        .replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/g, '<u>$1</u>')
+                        .replace(/• (.*?)(\n|$)/g, '<li class="ml-3 list-disc">$1</li>')
+                        .replace(/\n/g, '<br>');
                 }
 
                 async function loadAnnouncementsFeed() {
@@ -347,7 +328,7 @@ $csrf_token = getCsrfToken();
                             .select('*')
                             .eq('status', 'published')
                             .order('created_at', { ascending: false })
-                            .limit(5);
+                            .limit(8);
 
                         if (error) throw error;
 
@@ -362,15 +343,15 @@ $csrf_token = getCsrfToken();
                                 const dateStr = new Date(a.created_at).toLocaleDateString();
 
                                 return `
-                                <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-outline-variant/40 hover:bg-surface-container-low transition-colors space-y-1.5">
+                                <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-outline-variant/40 hover:bg-surface-container-low transition-colors space-y-2 overflow-hidden">
                                     <div class="flex items-center justify-between gap-2">
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${badgeClass} font-mono text-[10px] uppercase font-bold tracking-wide">
-                                            <span class="material-symbols-outlined text-[12px]">${icon}</span> ${a.category}
+                                            <span class="material-symbols-outlined text-[12px]">${icon}</span> ${escapeHtml(a.category)}
                                         </span>
-                                        <span class="font-mono text-[10px] text-on-surface-variant">${dateStr}</span>
+                                        <span class="font-mono text-[10px] text-on-surface-variant shrink-0">${dateStr}</span>
                                     </div>
-                                    <h4 class="text-sm font-bold text-primary">${a.title}</h4>
-                                    <div class="text-xs text-on-surface-variant leading-relaxed line-clamp-3">${formatMarkdown(a.body)}</div>
+                                    <h4 class="text-sm font-bold text-primary break-words leading-snug" style="overflow-wrap:anywhere; word-break:break-word;">${escapeHtml(a.title)}</h4>
+                                    <div class="text-xs text-on-surface-variant leading-relaxed break-words max-h-36 overflow-y-auto pr-1 custom-scroll" style="overflow-wrap:anywhere; word-break:break-word;">${formatMarkdown(a.body)}</div>
                                 </div>
                                 `;
                             }).join('');

@@ -1290,3 +1290,51 @@ html.dark .docs-separator { background-color: rgb(var(--outline-variant-rgb)) !i
     border: 1px solid rgba(255, 255, 255, .08);
 }
 .npc-navy-card .text-on-primary-container { color: rgba(170, 199, 255, .95); }
+
+/* ------------------------------------------------------------
+   21. UNIVERSAL NOTIFICATION BADGE & WRAPPER
+   Ensures unread counter numbers are perfectly centered and
+   never clipped or covered by surrounding borders.
+   ------------------------------------------------------------ */
+#npc-notif-badge, .npc-badge-pill {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9999px;
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 14px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgb(var(--surface-container-lowest-rgb, 255 255 255)) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    z-index: 30;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.dark #npc-notif-badge, .dark .npc-badge-pill {
+    border-color: rgb(var(--surface-container-lowest-rgb, 15 23 42)) !important;
+}
+
+/* Announcement word-break and scroll helpers */
+.announcement-body {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.custom-scroll::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--outline-variant-rgb));
+    border-radius: 4px;
+}

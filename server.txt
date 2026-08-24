@@ -1,0 +1,7 @@
+Sa unang terminal (PHP Server):
+powershell
+php -S 0.0.0.0:8000
+
+Sa pangalawang terminal (Cloudflare Tunnel):
+powershell
+& "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:8000
