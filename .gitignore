@@ -16,6 +16,11 @@ __pycache__/
 venv/
 env/
 
+# Node & binaries
+node_modules/
+*.zip
+ngrok.exe
+
 # IDE and agent files
 .agents/
 .vscode/
